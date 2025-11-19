@@ -1,0 +1,40 @@
+{
+  "name": "askwiki",
+  "version": "1.0.0",
+  "description": "a wiki-focused discord bot ",
+  "main": "index.ts",
+  "outputCapture": "std",
+  "console": "integratedTerminal",
+  "scripts": {
+    "build": "npx tsc",
+    "open": "node --env-file=.env dist/index.js",
+    "start": "npm run build && npm run open",
+    "deploy": "npm run build && node --env-file=.env dist/deploy.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Noobyguy775/askwiki.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "bot",
+    "wiki"
+  ],
+  "author": "Nooby",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Noobyguy775/askwiki/issues"
+  },
+  "homepage": "https://github.com/Noobyguy775/askwiki#readme",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "dotenv": "^17.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "discord.js": "^14.24.2",
+    "string-strip-html": "^13.5.0"
+  }
+}

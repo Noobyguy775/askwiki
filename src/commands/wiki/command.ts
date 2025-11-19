@@ -1,4 +1,4 @@
-import { ApplicationIntegrationType, ChatInputCommandInteraction, EmbedBuilder, InteractionContextType, SlashCommandBuilder, version as djsversion } from "discord.js";
+import { ApplicationIntegrationType, ChatInputCommandInteraction, EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder, version as djsversion } from "discord.js";
 import { version } from '../../../package.json';
 import { MediaWikiAPISearchResult } from "./types";
 import { wikis } from "./wikis";
@@ -47,7 +47,7 @@ module.exports = {
         const FoundPages = ((await response.json()) as MediaWikiAPISearchResult);
 
         if (FoundPages.pages.length === 0) {
-            await interaction.reply(`No results found for "${query}" on the selected wiki.`);
+            await interaction.reply({ content: `No results found for "${query}" on the selected wiki.`, flags: MessageFlags.Ephemeral });
             return;
         }
 
@@ -57,7 +57,8 @@ module.exports = {
         const pagepreview = new EmbedBuilder()
             .setTitle(page.title)
             .setURL(pageurl)
-            .setDescription(`${stripHtml(page.excerpt).result}[... Read more](${pageurl})`);
+            .setColor(0xf2ae26)
+            .setDescription(`${stripHtml(page.excerpt).result}[...](${pageurl})` + (page.title !== query ? `\n\n-# Showing similar page for query '*${query}*'` : ''));
         
         if (page.thumbnail) {
             pagepreview.setThumbnail(`https:${page.thumbnail.url}`);

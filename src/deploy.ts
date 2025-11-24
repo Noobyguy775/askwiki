@@ -23,7 +23,7 @@ for (const folder of commandFolders) {
 		if ('data' in command && 'execute' in command) {
 			commands.push(command.data.toJSON());
 		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			console.error(`The command at ${filePath} is missing a required "data" or "execute" property.`);
 		}
 	}
 }
@@ -32,11 +32,11 @@ const rest = new REST().setToken(token);
 
 (async () => {
 		try {
-		console.log(`Started refreshing ${commands.length} application (/) commands.`);
+		console.log(`refreshing ${commands.length} commands`);
 
 		const data = await rest.put(Routes.applicationCommands(clientid), { body: commands }) as RESTPutAPIApplicationCommandsResult;
 
-		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		console.log(`reloaded ${data.length} commands :)`);
 	} catch (error) {
 		console.error(error);
 	}

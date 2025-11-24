@@ -1,9 +1,5 @@
-import { ApplicationIntegrationType, ChatInputCommandInteraction, EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder, version as djsversion } from "discord.js";
-import { version } from '../../../package.json';
-import { MediaWikiAPISearchResult } from "./types";
-import { wikis } from "./wikis";
-
-import { stripHtml } from "string-strip-html";
+import { ApplicationIntegrationType, ChatInputCommandInteraction, EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { FetchPage, wikis } from "./wikis";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -25,45 +21,24 @@ module.exports = {
         .setContexts([ InteractionContextType.BotDM, InteractionContextType.Guild, InteractionContextType.PrivateChannel ])
         .setIntegrationTypes([ ApplicationIntegrationType.UserInstall ]),
     async execute(interaction: ChatInputCommandInteraction) {
-        const wiki = wikis.find(w => w.name == interaction.options.getString('wiki')) || wikis[0]!;
-        const query = interaction.options.getString('query') as string;
+        const wiki = wikis.find(w => w.name === interaction.options.getString('wiki')!) || wikis[0]!;
+        const fetch = new FetchPage(interaction.options.getString('query')!, wiki);
+        let embed: EmbedBuilder;
 
-        const url = `${wiki.api}search/page?q=${query}&limit=1`;
-        const userAgent = `AskWikiDiscordbot/${version} bot (github.com/Noobyguy775/askwiki) discord.js/${djsversion}`;
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'User-Agent': userAgent
+        try {
+            switch (fetch.wiki.name) {
+                case 'English Wikipedia':
+                    embed = await fetch.fromWikipedia();
+                    break;
+                case 'BSS Fandom':
+                    embed = await fetch.fromFandom(fetch.wiki.api);
+                    break;
             }
-        });
-
-        if (response.status !== 200) {
-            await interaction.reply(`Failed to fetch from wiki. Maybe it's down?`);
+        } catch (error) {
+            await interaction.reply({ content: (error as Error).message, flags: MessageFlags.Ephemeral });
             return;
         }
 
-        const FoundPages = ((await response.json()) as MediaWikiAPISearchResult);
-
-        if (FoundPages.pages.length === 0) {
-            await interaction.reply({ content: `No results found for "${query}" on the selected wiki.`, flags: MessageFlags.Ephemeral });
-            return;
-        }
-
-        const page = FoundPages.pages[0]!;
-        const pageurl = `${wiki.pages}${page.key}`;
-
-        const pagepreview = new EmbedBuilder()
-            .setTitle(page.title)
-            .setURL(pageurl)
-            .setColor(0xf2ae26)
-            .setDescription(`${stripHtml(page.excerpt).result}[...](${pageurl})` + (page.title !== query ? `\n\n-# Showing similar page for query '*${query}*'` : ''));
-        
-        if (page.thumbnail) {
-            pagepreview.setThumbnail(`https:${page.thumbnail.url}`);
-        }
-
-        await interaction.reply({ embeds: [pagepreview] });
+        await interaction.reply({ embeds: [embed!] });
     }
 }

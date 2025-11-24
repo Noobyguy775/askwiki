@@ -12,7 +12,7 @@ export default {
 				await Execute('Autocomplete', commands, interaction.commandName);
 				break;
 			default:
-				console.log(`Unhandled interaction: ${interaction.type}`);
+				console.error(`Unhandled interaction: ${interaction.type}`);
 			return;
 		}
 		async function Execute(type: 'Button' | 'Command' | 'Autocomplete', Object: Collection<string, any>, name: string){
